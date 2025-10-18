@@ -84,7 +84,7 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
       </svg>
       <div class="brand-title">Cyclo Énéo</div>
       <div class="badges">
-        <span class="badge" id="badgeVersion">v1.0.5</span>
+        <span class="badge" id="badgeVersion">v1.0.6</span>
         <span class="badge" id="clubSize">0 membres</span>
       </div>
     </div>
@@ -180,7 +180,7 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
     <div class="grid" style="grid-template-columns:1fr 1fr">
       <div class="panel" style="background:var(--panel-soft)">
         <h3>📥 Import</h3>
-        <div class="small">CSV colonnes : <code>nom, prénom, tel, mail</code> (en-tête optionnel).</div>
+        <div class="small">CSV colonnes : <code>nom; prénom; tel; mail</code> ou <code>nom, prénom, tel, mail</code> (les deux acceptés).</div>
         <label class="btn">Importer CSV<input id="csvInput" type="file" accept=".csv" hidden></label>
         <div class="hr"></div>
         <label class="btn">Restaurer sauvegarde<input id="restoreInput" type="file" accept=".json" hidden></label>
@@ -207,29 +207,16 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  /* --- D'abord les helpers DOM (évite la zone morte) --- */
-  const el = (s)=>document.querySelector(s);
-  const els = (s)=>Array.from(document.querySelectorAll(s));
-
-  /* --- Toast erreurs --- */
+  /* DOM helpers */
+  const el = s=>document.querySelector(s), els = s=>Array.from(document.querySelectorAll(s));
   const toast = document.getElementById('errToast');
-  function showError(msg){
-    console.error('[Cyclo Énéo]', msg);
-    if(!toast) return;
-    toast.textContent = 'Erreur: ' + msg;
-    toast.style.display = 'block';
-    clearTimeout(showError._t);
-    showError._t = setTimeout(()=> toast.style.display='none', 4000);
-  }
+  const showError = msg => { console.error('[Cyclo Énéo]', msg); if(!toast) return; toast.textContent='Erreur: '+msg; toast.style.display='block'; clearTimeout(showError._t); showError._t=setTimeout(()=>toast.style.display='none',4000); };
   window.onerror = (m,src,ln,col,err)=>{ showError(err?.message || m); };
 
-  /* --- Version & infos --- */
-  const APP_VERSION='v1.0.5';
-  const safeSetText = (sel,txt)=>{ const n=el(sel); if(n) n.textContent=txt; };
-  safeSetText('#badgeVersion', APP_VERSION);
-  safeSetText('#appInfo', `Cyclo Énéo — ${APP_VERSION}. Données locales (LocalStorage).`);
+  const APP_VERSION='v1.0.6';
+  el('#badgeVersion').textContent=APP_VERSION;
+  el('#appInfo').textContent=`Cyclo Énéo — ${APP_VERSION}. Données locales (LocalStorage).`;
 
-  /* --- Stockage & état --- */
   const KEYS={ members:'cycloeneo.members.v6', events:'cycloeneo.events.v6', attendance:'cycloeneo.attendance.v6', sort:'cycloeneo.sort.v2' };
   const load=(k,f)=>{ try{const r=localStorage.getItem(k); return r?JSON.parse(r):f;}catch(e){showError(e.message); return f;} };
   const State={
@@ -238,21 +225,42 @@ document.addEventListener('DOMContentLoaded', () => {
     attendance:load(KEYS.attendance,{}),
     sort:load(KEYS.sort,{members:{key:'nom',asc:true},events:{key:'date',asc:true,type:'date'}})
   };
-  const saveAll=()=>{ try{
-    localStorage.setItem(KEYS.members,JSON.stringify(State.members));
-    localStorage.setItem(KEYS.events,JSON.stringify(State.events));
-    localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance));
-    localStorage.setItem(KEYS.sort,JSON.stringify(State.sort));
-    renderAll();
-  }catch(e){ showError(e.message); } };
-  const saveAttendance=()=>{ try{ localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance)); }catch(e){ showError(e.message); } };
-  const saveSort=()=>{ try{ localStorage.setItem(KEYS.sort,JSON.stringify(State.sort)); }catch(e){ showError(e.message); } };
-
-  /* --- Utils --- */
+  const saveAll=()=>{ localStorage.setItem(KEYS.members,JSON.stringify(State.members)); localStorage.setItem(KEYS.events,JSON.stringify(State.events)); localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance)); localStorage.setItem(KEYS.sort,JSON.stringify(State.sort)); renderAll(); };
+  const saveAttendance=()=> localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance));
+  const saveSort=()=> localStorage.setItem(KEYS.sort,JSON.stringify(State.sort));
   const uid=()=>Math.random().toString(36).slice(2,10);
   const esc=s=>(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const escAttr=s=>esc(s).replace(/"/g,'&quot;');
 
+  /* ---------- CSV utils : auto ; ou , ---------- */
+  const detectDelimiter = (text)=>{
+    const firstLine = (text.split(/\r?\n/).find(l=>l.trim().length>0) || '');
+    const sc = (firstLine.match(/;/g)||[]).length;
+    const cm = (firstLine.match(/,/g)||[]).length;
+    return sc>cm ? ';' : ',';
+  };
+  function parseCSV(text){
+    const D = detectDelimiter(text);
+    const rows=[]; let row=[], cur='', inQ=false;
+    for(let i=0;i<text.length;i++){
+      const c=text[i], n=text[i+1];
+      if(c === '"'){ if(inQ && n === '"'){ cur+='"'; i++; } else inQ=!inQ; }
+      else if(c === D && !inQ){ row.push(cur.trim()); cur=''; }
+      else if((c==='\n'||c==='\r') && !inQ){ if(cur.length||row.length){ row.push(cur.trim()); rows.push(row); row=[]; cur=''; } if(c==='\r'&&n==='\n'){ i++; } }
+      else cur+=c;
+    }
+    if(cur.length||row.length){ row.push(cur.trim()); rows.push(row); }
+    return rows.filter(r=>r.some(x=>x && x.length));
+  }
+  function toCSV(rows, delim=';'){
+    return rows.map(r=>r.map(c=>{
+      const s=(c??'').toString();
+      return (new RegExp(`[${delim}"\\n\\r]`).test(s)) ? `"${s.replace(/"/g,'""')}"` : s;
+    }).join(delim)).join('\n');
+  }
+  function download(filename,content){ const blob=new Blob([content],{type: filename.endsWith('.json')?'application/json':'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1200); }
+
+  /* ---------- Tri générique ---------- */
   const sortBy=(arr,key,asc=true,type='text')=>{
     const n=v=> type==='date' ? (v||'') : (v??'').toString().toLowerCase();
     return arr.sort((a,b)=> (n(a[key])<n(b[key])?-1: n(a[key])>n(b[key])?1:0) * (asc?1:-1));
@@ -263,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(sp) sp.textContent = st.asc ? '▲' : '▼';
   };
 
-  /* --- Membres --- */
+  /* ---------- Membres ---------- */
   function renderMembers(){
     const tbody=el('#tblMembers tbody'); if(!tbody) return;
     const q=(el('#searchMember')?.value||'').toLowerCase();
@@ -282,16 +290,17 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.querySelectorAll('[contenteditable]').forEach(td=>{
         td.addEventListener('blur',()=>{ m[td.dataset.k]=td.textContent.trim(); saveAll(); });
       });
-      const del=tr.querySelector('[data-del]');
-      if(del) del.onclick=()=>{ if(confirm('Supprimer ce membre ?')){
-        for(const evId of Object.keys(State.attendance)){ delete (State.attendance[evId]||{})[m.id]; }
-        State.members=State.members.filter(x=>x!==m); saveAll();
-      }};
+      tr.querySelector('[data-del]')?.addEventListener('click',()=>{
+        if(confirm('Supprimer ce membre ?')){
+          for(const evId of Object.keys(State.attendance)){ delete (State.attendance[evId]||{})[m.id]; }
+          State.members=State.members.filter(x=>x!==m); saveAll();
+        }
+      });
       tbody.appendChild(tr);
     });
     renderSortArrows('#tblMembers', State.sort.members);
-    safeSetText('#clubSize', `${State.members.length} membres`);
-    safeSetText('#kpiMembers', State.members.length);
+    el('#clubSize').textContent=`${State.members.length} membres`;
+    el('#kpiMembers').textContent=State.members.length;
   }
   el('#btnAddMember')?.addEventListener('click',()=>{ State.members.push({id:uid(),nom:'',prenom:'',tel:'',mail:''}); saveAll(); });
   el('#searchMember')?.addEventListener('input',renderMembers);
@@ -304,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* --- Événements --- */
+  /* ---------- Événements ---------- */
   function renderEvents(){
     const tbody=el('#tblEvents tbody'); if(!tbody) return;
     const rows=[...State.events]; sortBy(rows, State.sort.events.key, State.sort.events.asc, State.sort.events.type);
@@ -336,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tbody.appendChild(tr);
     });
     renderSortArrows('#tblEvents', State.sort.events);
-    safeSetText('#kpiEvents', State.events.length);
+    el('#kpiEvents').textContent=State.events.length;
   }
   els('#tblEvents th.sortable').forEach(th=>{
     th.addEventListener('click',()=>{
@@ -357,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     State.events.push(ev); State.attendance[ev.id]={}; e.target.reset(); saveAll(); renderMatrix(ev.id);
   });
 
-  /* --- Matrice Présences --- */
+  /* ---------- Matrice Présences ---------- */
   function renderMatrix(focusEventId=null){
     const thead=el('#tblMatrix thead'), tbody=el('#tblMatrix tbody'); if(!thead||!tbody) return;
     const evs=[...State.events]; sortBy(evs, State.sort.events.key, State.sort.events.asc, State.sort.events.type);
@@ -400,12 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(()=>els(`#tblMatrix [data-ev="${evId}"]`).forEach(td=> td.style.outline='none'),1200);
   }
 
-  /* --- Stats --- */
+  /* ---------- Stats ---------- */
   function updateKPIs(){
     const present = Object.values(State.attendance).reduce((s,map)=> s + (map? Object.values(map).filter(x=>x==='P').length : 0), 0);
     const slots = State.members.length * State.events.length;
-    safeSetText('#kpiPresence', present);
-    safeSetText('#kpiRate', slots? Math.round((present/slots)*100)+'%':'0%');
+    el('#kpiPresence').textContent=present;
+    el('#kpiRate').textContent= slots? Math.round((present/slots)*100)+'%':'0%';
   }
   function renderStats(){
     const mWrap=el('#statMembers'), eWrap=el('#statEvents'); if(!mWrap||!eWrap) return;
@@ -436,11 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* --- Import / Export / Backup --- */
-  function parseCSV(t){const rows=[];let row=[],cur='',inQ=false;for(let i=0;i<t.length;i++){const c=t[i],n=t[i+1];if(c=='"'){if(inQ&&n=='"'){cur+='"';i++;}else inQ=!inQ;}else if(c==','&&!inQ){row.push(cur.trim());cur='';}else if((c=='\n'||c=='\r')&&!inQ){if(cur.length||row.length){row.push(cur.trim());rows.push(row);row=[];cur='';}if(c=='\r'&&n=='\n'){i++;}}else cur+=c;}if(cur.length||row.length){row.push(cur.trim());rows.push(row);}return rows.filter(r=>r.some(x=>x&&x.length));}
-  function toCSV(rows){return rows.map(r=>r.map(c=>{const s=(c??'').toString();return (/[,"\n\r]/.test(s))?`"${s.replace(/"/g,'""')}"`:s;}).join(',')).join('\n');}
-  function download(filename,content){const blob=new Blob([content],{type:filename.endsWith('.json')?'application/json':'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);}
-
+  /* ---------- Import / Export / Backup ---------- */
   el('#csvInput')?.addEventListener('change', async e=>{
     const f=e.target.files[0]; if(!f) return;
     try{
@@ -448,17 +453,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const head=(rows[0]||[]).map(x=>x.toLowerCase());
       const hasHeader=['nom','prénom','prenom','tel','téléphone','mail','email','e-mail'].some(h=>head.includes(h));
       const data=rows.slice(hasHeader?1:0);
-      const newcomers=data.map(r=>({id:uid(),nom:r[0]||'',prenom:r[1]||'',tel:r[2]||'',mail:r[3]||''}))
+      const newcomers=data.map(r=>({id:uid(), nom:r[0]||'', prenom:r[1]||'', tel:r[2]||'', mail:r[3]||''}))
                           .filter(m=>m.nom||m.prenom||m.mail||m.tel);
       const byMail=new Map(State.members.filter(m=>m.mail).map(m=>[m.mail.toLowerCase(),m]));
-      newcomers.forEach(nm=>{const k=(nm.mail||'').toLowerCase(),ex=k&&byMail.get(k);
-        if(ex){ex.nom=nm.nom||ex.nom;ex.prenom=nm.prenom||ex.prenom;ex.tel=nm.tel||ex.tel;} else State.members.push(nm);});
+      newcomers.forEach(nm=>{ const k=(nm.mail||'').toLowerCase(), ex=k && byMail.get(k);
+        if(ex){ ex.nom=nm.nom||ex.nom; ex.prenom=nm.prenom||ex.prenom; ex.tel=nm.tel||ex.tel; }
+        else State.members.push(nm);
+      });
       saveAll(); e.target.value='';
     }catch(err){ showError(err.message); }
   });
+
   el('#btnExportMembers')?.addEventListener('click',()=>{
     const rows=[['nom','prenom','tel','mail'], ...State.members.map(m=>[m.nom,m.prenom,m.tel,m.mail])];
-    download('membres.csv', toCSV(rows));
+    download('membres.csv', toCSV(rows, ';')); // export FR-friendly
   });
   el('#btnExportAttendance')?.addEventListener('click',()=>{
     const evs=[...State.events]; sortBy(evs,'date',true,'date');
@@ -470,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
       State.members.forEach(m=> r.push(map[m.id]||'') );
       rows.push(r);
     });
-    download('presences.csv', toCSV(rows));
+    download('presences.csv', toCSV(rows, ';')); // export FR-friendly
   });
   el('#btnBackup')?.addEventListener('click',()=>{
     download('cycloeneo_backup.json', JSON.stringify({
@@ -496,16 +504,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   el('#btnExample')?.addEventListener('click',()=>{
-    const csv=`nom,prenom,tel,mail
-Durand,Luc,0612345678,luc@example.com
-Martin,Sophie,0611223344,sophie@example.com
-Lefevre,Marc,0611558899,marc@example.com
-Dubois,Claire,0611228899,claire@example.com
-Lambert,Noé,0611002200,noe@example.com
-Moreau,Emma,0619988776,emma@example.com
-Petit,Anouk,0612341111,anouk@example.com
-Roux,Victor,0612342222,victor@example.com`;
-    const rows=csv.trim().split('\n').slice(1).map(l=>l.split(','));
+    const csv=`nom;prenom;tel;mail
+Durand;Luc;0612345678;luc@example.com
+Martin;Sophie;0611223344;sophie@example.com
+Lefevre;Marc;0611558899;marc@example.com
+Dubois;Claire;0611228899;claire@example.com`;
+    const rows=parseCSV(csv).slice(1);
     State.members=rows.map(r=>({id:uid(),nom:r[0],prenom:r[1],tel:r[2],mail:r[3]}));
     const today=new Date(), d=o=>new Date(today.getTime()+o*86400000).toISOString().slice(0,10);
     State.events=[
@@ -518,14 +522,13 @@ Roux,Victor,0612342222,victor@example.com`;
     saveAll(); renderMatrix();
   });
 
-  /* --- Tabs --- */
+  /* Tabs */
   els('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
     els('.tab-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
     els('.view').forEach(v=>v.classList.remove('active')); el('#'+b.dataset.tab)?.classList.add('active');
     if(b.dataset.tab==='tab-matrix') renderMatrix();
   }));
 
-  /* --- Initial render --- */
   function renderAll(){ renderMembers(); renderEvents(); renderMatrix(); }
   renderAll();
 });
