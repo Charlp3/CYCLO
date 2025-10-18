@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cyclo Énéo</title>
+<meta name="description" content="Cyclo Énéo — gestion locale des membres, événements et présences.">
+<style>
+:root{
+  --bg-1:#fff8cc; --bg-2:#fff1a3;
+  --panel:#ffffff; --panel-soft:#fffdf2;
+  --text:#1f2430; --muted:#5c6472;
+  --border:#e8e0b2; --grid:#efe6be;
+  --brand:#0f64b3; --accent:#f7b500; --accent-2:#ffd24d;
+  --focus:#ffcf33; --present:#1f9d55; --absent:#d64545;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;color:var(--text);
+  background:linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 70%, var(--bg-1) 100%);}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fffdf2 0%, #fff7cc 100%);border-bottom:1px solid var(--border);}
+.container{max-width:1200px;margin:auto;padding:14px 16px}
+.brand{display:flex;gap:12px;align-items:center}
+.icon-bike{width:58px;height:58px;flex:0 0 58px;color:var(--brand)}
+.brand-title{font-size:26px;font-weight:900;letter-spacing:.2px}
+.badges{display:flex;gap:8px;align-items:center;margin-left:auto}
+.badge{padding:4px 10px;border-radius:999px;background:var(--panel-soft);border:1px solid var(--border);font-size:12px;color:var(--muted);font-weight:700}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tab-btn{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:800;box-shadow:0 2px 0 rgba(0,0,0,.03)}
+.tab-btn.active{background:var(--accent-2);border-color:#f2c43a;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
+.tab-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+main.container{padding-top:14px;padding-bottom:24px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px 14px 10px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.panel h2{margin:2px 0 12px;font-size:18px}
+.panel .sub{color:var(--muted);font-size:12px;margin:-6px 0 10px}
+.grid{display:grid;gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--panel-soft);border:1px solid var(--border);padding:12px;border-radius:12px}
+.kpi .label{font-size:12px;color:var(--muted)}
+.kpi .value{font-size:22px;font-weight:900;color:#7a5d00}
+.table-wrap{border:1px solid var(--grid);border-radius:10px;overflow:auto;max-height:420px;background:white}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px;border-bottom:1px solid var(--grid);white-space:nowrap}
+th{position:sticky;top:0;background:#fff6c9;z-index:1;text-align:left;user-select:none}
+th.sortable{cursor:pointer}
+th.sortable:hover{background:#fff1a3}
+th .arrow{font-size:11px;color:var(--muted);margin-left:4px}
+tr:hover td{background:#fff8dc}
+input,select{background:#fffdf2;color:var(--text);border:1px solid var(--border);padding:9px 10px;border-radius:8px}
+input:focus,select:focus{outline:3px solid var(--focus);outline-offset:2px}
+button,.btn{background:linear-gradient(180deg,var(--accent) 0%, #ffb000 100%);color:#2b2109;border:1px solid #f2ad00;padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:900;transition:.15s;display:inline-flex;gap:8px;align-items:center}
+button:hover{transform:translateY(-1px)}
+button.ghost{background:var(--panel);border:1px solid var(--border);color:var(--text)}
+button.danger{background:linear-gradient(180deg,#ff7a7a 0%, #f25d5d 100%);border-color:#e85b5b;color:#fff}
+.state{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid rgba(0,0,0,.06)}
+.state[data-s="P"]{background:#e8fff3;color:#0b6b3b;border-color:#9be7be}
+.state[data-s="A"]{background:#ffecec;color:#8a2020;border-color:#ffb3b3}
+.state[data-s=""]{background:#f0f3f7;color:#667085;border-color:#d6dde8}
+.small{font-size:12px;color:var(--muted)}
+.flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1}
+.right{margin-left:auto}
+.hr{height:1px;background:var(--border);margin:10px 0}
+.view{display:none}
+.view.active{display:block}
+footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--border);background:#fff9d6}
+#errToast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#ffeded;color:#7a1f1f;border:1px solid #f3b1b1;padding:8px 12px;border-radius:8px;font-size:13px;display:none;z-index:9999}
+</style>
+</head>
+<body>
+
+<div id="errToast" role="alert" aria-live="assertive"></div>
+
+<header>
+  <div class="container">
+    <div class="brand">
+      <!-- Icône vélo -->
+      <svg class="icon-bike" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Icône vélo">
+        <g fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="14" cy="46" r="10"/><circle cx="50" cy="46" r="10"/>
+          <path d="M14 46l12-22h10l8 16H34L26 46"/><circle cx="30" cy="42" r="3"/>
+          <path d="M26 24l7 13"/><path d="M36 24h10"/><path d="M26 24h-6"/>
+        </g>
+      </svg>
+      <div class="brand-title">Cyclo Énéo</div>
+      <div class="badges">
+        <span class="badge" id="badgeVersion">v1.0.5</span>
+        <span class="badge" id="clubSize">0 membres</span>
+      </div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="tab-members">👥 Membres</button>
+      <button class="tab-btn" data-tab="tab-events">📅 Événements</button>
+      <button class="tab-btn" data-tab="tab-matrix">🧾 Présences</button>
+      <button class="tab-btn" data-tab="tab-stats">📊 Stats</button>
+      <button class="tab-btn" data-tab="tab-settings">⚙️ Paramètres</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="kpis" id="kpis">
+    <div class="kpi"><div class="label">Membres</div><div class="value" id="kpiMembers">0</div></div>
+    <div class="kpi"><div class="label">Événements</div><div class="value" id="kpiEvents">0</div></div>
+    <div class="kpi"><div class="label">Présences (P)</div><div class="value" id="kpiPresence">0</div></div>
+    <div class="kpi"><div class="label">Taux moyen</div><div class="value" id="kpiRate">0%</div></div>
+  </section>
+
+  <!-- Membres -->
+  <section id="tab-members" class="view active panel">
+    <h2>👥 Membres</h2>
+    <div class="flex"><input id="searchMember" class="grow" placeholder="Rechercher..." /><button id="btnAddMember">➕ Ajouter</button></div>
+    <div class="table-wrap" style="margin-top:8px">
+      <table id="tblMembers">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="sortable" data-k="nom">Nom <span class="arrow"></span></th>
+            <th class="sortable" data-k="prenom">Prénom <span class="arrow"></span></th>
+            <th class="sortable" data-k="tel">Téléphone <span class="arrow"></span></th>
+            <th class="sortable" data-k="mail">Mail <span class="arrow"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Événements -->
+  <section id="tab-events" class="view panel">
+    <h2>📅 Événements</h2>
+    <div class="sub">Crée une sortie puis clique “Pointer” pour ouvrir la colonne dans la matrice.</div>
+    <form id="frmEvent" class="grid" style="grid-template-columns:repeat(2,1fr)">
+      <input type="date" id="evDate" required />
+      <input type="text" id="evTitle" placeholder="Titre ex. Sortie du dimanche" required />
+      <input type="text" id="evPlace" placeholder="Lieu ex. Bois de la Cambre" />
+      <input type="text" id="evMeta" placeholder="Détails ex. 65 km — allure modérée" />
+      <button type="submit">➕ Ajouter l’événement</button>
+    </form>
+    <div class="table-wrap" style="margin-top:8px;max-height:320px">
+      <table id="tblEvents">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="sortable" data-k="date" data-type="date">Date <span class="arrow"></span></th>
+            <th class="sortable" data-k="title">Titre <span class="arrow"></span></th>
+            <th class="sortable" data-k="place">Lieu <span class="arrow"></span></th>
+            <th class="sortable" data-k="meta">Détails <span class="arrow"></span></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Présences -->
+  <section id="tab-matrix" class="view panel">
+    <h2>🧾 Présences</h2>
+    <div class="sub">Clique pour basculer <span class="state" data-s="P">Présent</span> / <span class="state" data-s="A">Absent</span> — clic long pour vider.</div>
+    <div class="table-wrap">
+      <table id="tblMatrix"><thead></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section id="tab-stats" class="view panel">
+    <h2>📊 Statistiques</h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div><div class="small">Top présence (membres)</div><div id="statMembers"></div></div>
+      <div><div class="small">Taux par événement</div><div id="statEvents"></div></div>
+    </div>
+  </section>
+
+  <!-- Paramètres -->
+  <section id="tab-settings" class="view panel">
+    <h2>⚙️ Paramètres & Données</h2>
+    <div class="small" id="appInfo"></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr">
+      <div class="panel" style="background:var(--panel-soft)">
+        <h3>📥 Import</h3>
+        <div class="small">CSV colonnes : <code>nom, prénom, tel, mail</code> (en-tête optionnel).</div>
+        <label class="btn">Importer CSV<input id="csvInput" type="file" accept=".csv" hidden></label>
+        <div class="hr"></div>
+        <label class="btn">Restaurer sauvegarde<input id="restoreInput" type="file" accept=".json" hidden></label>
+      </div>
+      <div class="panel" style="background:var(--panel-soft)">
+        <h3>📤 Export</h3>
+        <div class="flex" style="margin-bottom:6px"><button id="btnExportMembers" class="ghost">Exporter membres CSV</button></div>
+        <div class="flex" style="margin-bottom:6px"><button id="btnExportAttendance" class="ghost">Exporter présences CSV</button></div>
+        <div class="flex"><button id="btnBackup" class="ghost">Sauvegarde (JSON)</button></div>
+      </div>
+      <div class="panel" style="background:var(--panel-soft)">
+        <h3>🧪 Données d’exemple</h3>
+        <button id="btnExample">Charger un exemple</button>
+      </div>
+      <div class="panel" style="background:var(--panel-soft)">
+        <h3>🗑️ Maintenance</h3>
+        <button id="btnClearAll" class="danger">Tout effacer</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>© Pierre Charlier 2025 — Cyclo Énéo</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  /* --- D'abord les helpers DOM (évite la zone morte) --- */
+  const el = (s)=>document.querySelector(s);
+  const els = (s)=>Array.from(document.querySelectorAll(s));
+
+  /* --- Toast erreurs --- */
+  const toast = document.getElementById('errToast');
+  function showError(msg){
+    console.error('[Cyclo Énéo]', msg);
+    if(!toast) return;
+    toast.textContent = 'Erreur: ' + msg;
+    toast.style.display = 'block';
+    clearTimeout(showError._t);
+    showError._t = setTimeout(()=> toast.style.display='none', 4000);
+  }
+  window.onerror = (m,src,ln,col,err)=>{ showError(err?.message || m); };
+
+  /* --- Version & infos --- */
+  const APP_VERSION='v1.0.5';
+  const safeSetText = (sel,txt)=>{ const n=el(sel); if(n) n.textContent=txt; };
+  safeSetText('#badgeVersion', APP_VERSION);
+  safeSetText('#appInfo', `Cyclo Énéo — ${APP_VERSION}. Données locales (LocalStorage).`);
+
+  /* --- Stockage & état --- */
+  const KEYS={ members:'cycloeneo.members.v6', events:'cycloeneo.events.v6', attendance:'cycloeneo.attendance.v6', sort:'cycloeneo.sort.v2' };
+  const load=(k,f)=>{ try{const r=localStorage.getItem(k); return r?JSON.parse(r):f;}catch(e){showError(e.message); return f;} };
+  const State={
+    members:load(KEYS.members,[]),
+    events:load(KEYS.events,[]),
+    attendance:load(KEYS.attendance,{}),
+    sort:load(KEYS.sort,{members:{key:'nom',asc:true},events:{key:'date',asc:true,type:'date'}})
+  };
+  const saveAll=()=>{ try{
+    localStorage.setItem(KEYS.members,JSON.stringify(State.members));
+    localStorage.setItem(KEYS.events,JSON.stringify(State.events));
+    localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance));
+    localStorage.setItem(KEYS.sort,JSON.stringify(State.sort));
+    renderAll();
+  }catch(e){ showError(e.message); } };
+  const saveAttendance=()=>{ try{ localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance)); }catch(e){ showError(e.message); } };
+  const saveSort=()=>{ try{ localStorage.setItem(KEYS.sort,JSON.stringify(State.sort)); }catch(e){ showError(e.message); } };
+
+  /* --- Utils --- */
+  const uid=()=>Math.random().toString(36).slice(2,10);
+  const esc=s=>(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const escAttr=s=>esc(s).replace(/"/g,'&quot;');
+
+  const sortBy=(arr,key,asc=true,type='text')=>{
+    const n=v=> type==='date' ? (v||'') : (v??'').toString().toLowerCase();
+    return arr.sort((a,b)=> (n(a[key])<n(b[key])?-1: n(a[key])>n(b[key])?1:0) * (asc?1:-1));
+  };
+  const renderSortArrows=(tableId, st)=>{
+    els(`${tableId} th.sortable .arrow`).forEach(sp=> sp.textContent='');
+    const sp = el(`${tableId} th.sortable[data-k="${st.key}"] .arrow`);
+    if(sp) sp.textContent = st.asc ? '▲' : '▼';
+  };
+
+  /* --- Membres --- */
+  function renderMembers(){
+    const tbody=el('#tblMembers tbody'); if(!tbody) return;
+    const q=(el('#searchMember')?.value||'').toLowerCase();
+    let list=State.members.filter(m=>[m.nom,m.prenom,m.tel,m.mail].some(v=>(v||'').toLowerCase().includes(q)));
+    sortBy(list, State.sort.members.key, State.sort.members.asc, 'text');
+    tbody.innerHTML='';
+    list.forEach((m,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${i+1}</td>
+        <td contenteditable data-k="nom">${esc(m.nom)}</td>
+        <td contenteditable data-k="prenom">${esc(m.prenom)}</td>
+        <td contenteditable data-k="tel">${esc(m.tel)}</td>
+        <td contenteditable data-k="mail">${esc(m.mail)}</td>
+        <td><button data-del class="danger">🗑️</button></td>`;
+      tr.querySelectorAll('[contenteditable]').forEach(td=>{
+        td.addEventListener('blur',()=>{ m[td.dataset.k]=td.textContent.trim(); saveAll(); });
+      });
+      const del=tr.querySelector('[data-del]');
+      if(del) del.onclick=()=>{ if(confirm('Supprimer ce membre ?')){
+        for(const evId of Object.keys(State.attendance)){ delete (State.attendance[evId]||{})[m.id]; }
+        State.members=State.members.filter(x=>x!==m); saveAll();
+      }};
+      tbody.appendChild(tr);
+    });
+    renderSortArrows('#tblMembers', State.sort.members);
+    safeSetText('#clubSize', `${State.members.length} membres`);
+    safeSetText('#kpiMembers', State.members.length);
+  }
+  el('#btnAddMember')?.addEventListener('click',()=>{ State.members.push({id:uid(),nom:'',prenom:'',tel:'',mail:''}); saveAll(); });
+  el('#searchMember')?.addEventListener('input',renderMembers);
+  els('#tblMembers th.sortable').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const k=th.dataset.k;
+      if(State.sort.members.key===k) State.sort.members.asc=!State.sort.members.asc;
+      else {State.sort.members.key=k; State.sort.members.asc=true;}
+      saveSort(); renderMembers(); renderMatrix();
+    });
+  });
+
+  /* --- Événements --- */
+  function renderEvents(){
+    const tbody=el('#tblEvents tbody'); if(!tbody) return;
+    const rows=[...State.events]; sortBy(rows, State.sort.events.key, State.sort.events.asc, State.sort.events.type);
+    tbody.innerHTML='';
+    rows.forEach((ev,i)=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td>${i+1}</td>
+        <td><input type="date" value="${ev.date||''}" data-k="date"/></td>
+        <td><input value="${escAttr(ev.title||'')}" data-k="title"/></td>
+        <td><input value="${escAttr(ev.place||'')}" data-k="place"/></td>
+        <td><input value="${escAttr(ev.meta||'')}" data-k="meta"/></td>
+        <td><button data-open class="ghost">🧾 Pointer</button><button data-dup class="ghost">🗂️</button><button data-del class="danger">🗑️</button></td>`;
+      tr.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('change',()=>{ ev[inp.dataset.k]=inp.value.trim(); saveAll(); });
+      });
+      tr.querySelector('[data-open]')?.addEventListener('click',()=>{
+        renderMatrix(ev.id); el('.tab-btn[data-tab="tab-matrix"]')?.click(); highlightColumn(ev.id);
+      });
+      tr.querySelector('[data-dup]')?.addEventListener('click',()=>{
+        const clone={...ev, id:uid()}; State.events.push(clone);
+        State.attendance[clone.id]=JSON.parse(JSON.stringify(State.attendance[ev.id]||{})); saveAll();
+      });
+      tr.querySelector('[data-del]')?.addEventListener('click',()=>{
+        if(confirm(`Supprimer "${ev.title||''}" du ${ev.date||''} ?`)){
+          delete State.attendance[ev.id]; State.events=State.events.filter(x=>x.id!==ev.id); saveAll();
+        }
+      });
+      tbody.appendChild(tr);
+    });
+    renderSortArrows('#tblEvents', State.sort.events);
+    safeSetText('#kpiEvents', State.events.length);
+  }
+  els('#tblEvents th.sortable').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const k=th.dataset.k; const type=th.dataset.type||'text';
+      if(State.sort.events.key===k) State.sort.events.asc=!State.sort.events.asc;
+      else {State.sort.events.key=k; State.sort.events.asc=true; State.sort.events.type=type;}
+      saveSort(); renderEvents(); renderMatrix();
+    });
+  });
+  el('#frmEvent')?.addEventListener('submit',e=>{
+    e.preventDefault();
+    const ev={ id:uid(),
+      date:el('#evDate')?.value || new Date().toISOString().slice(0,10),
+      title:(el('#evTitle')?.value||'Sortie').trim(),
+      place:(el('#evPlace')?.value||'').trim(),
+      meta:(el('#evMeta')?.value||'').trim()
+    };
+    State.events.push(ev); State.attendance[ev.id]={}; e.target.reset(); saveAll(); renderMatrix(ev.id);
+  });
+
+  /* --- Matrice Présences --- */
+  function renderMatrix(focusEventId=null){
+    const thead=el('#tblMatrix thead'), tbody=el('#tblMatrix tbody'); if(!thead||!tbody) return;
+    const evs=[...State.events]; sortBy(evs, State.sort.events.key, State.sort.events.asc, State.sort.events.type);
+    thead.innerHTML=''; const trh=document.createElement('tr');
+    trh.innerHTML=`<th>Membre</th>`+evs.map(ev=>`<th data-ev="${ev.id}" title="${escAttr(ev.title||'')}">${ev.date||''}<div class="small">${esc(ev.title||'')}</div></th>`).join('');
+    thead.appendChild(trh);
+    const members=[...State.members]; sortBy(members, State.sort.members.key, State.sort.members.asc, 'text');
+    tbody.innerHTML='';
+    members.forEach(m=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${esc(m.prenom)} ${esc(m.nom)}</td>`+evs.map(ev=>{
+        const s=(State.attendance[ev.id]||{})[m.id]||'';
+        return `<td data-ev="${ev.id}" data-m="${m.id}" style="text-align:center;cursor:pointer"><span class="state" data-s="${s}">${s==='P'?'Présent':s==='A'?'Absent':'—'}</span></td>`;
+      }).join('');
+      tbody.appendChild(tr);
+    });
+    tbody.querySelectorAll('td[data-ev]').forEach(td=>{
+      let t=null;
+      td.onclick=()=>{
+        const evId=td.getAttribute('data-ev'), mId=td.getAttribute('data-m');
+        const cur=(State.attendance[evId]||{})[mId]||'';
+        const next=cur==='P'?'A':cur==='A'?'P':'P';
+        State.attendance[evId]=State.attendance[evId]||{}; State.attendance[evId][mId]=next;
+        td.innerHTML=`<span class="state" data-s="${next}">${next==='P'?'Présent':'Absent'}</span>`;
+        updateKPIs(); renderStats(); saveAttendance();
+      };
+      td.onmousedown=()=>{ t=setTimeout(()=>{
+        const evId=td.getAttribute('data-ev'), mId=td.getAttribute('data-m');
+        State.attendance[evId]=State.attendance[evId]||{}; State.attendance[evId][mId]='';
+        td.innerHTML=`<span class="state" data-s=""></span>`; updateKPIs(); renderStats(); saveAttendance();
+      },550); };
+      td.onmouseup=()=>clearTimeout(t); td.onmouseleave=()=>clearTimeout(t);
+    });
+    if(focusEventId) highlightColumn(focusEventId);
+    updateKPIs(); renderStats();
+  }
+  function highlightColumn(evId){
+    els('#tblMatrix th, #tblMatrix td').forEach(td=> td.style.outline='none');
+    els(`#tblMatrix [data-ev="${evId}"]`).forEach(td=> td.style.outline='2px solid #f7b500');
+    setTimeout(()=>els(`#tblMatrix [data-ev="${evId}"]`).forEach(td=> td.style.outline='none'),1200);
+  }
+
+  /* --- Stats --- */
+  function updateKPIs(){
+    const present = Object.values(State.attendance).reduce((s,map)=> s + (map? Object.values(map).filter(x=>x==='P').length : 0), 0);
+    const slots = State.members.length * State.events.length;
+    safeSetText('#kpiPresence', present);
+    safeSetText('#kpiRate', slots? Math.round((present/slots)*100)+'%':'0%');
+  }
+  function renderStats(){
+    const mWrap=el('#statMembers'), eWrap=el('#statEvents'); if(!mWrap||!eWrap) return;
+    mWrap.innerHTML=''; eWrap.innerHTML='';
+    const memb=[...State.members]; sortBy(memb,'nom',true);
+    memb.map(m=>{
+      let p=0,a=0,mark=0;
+      for(const ev of State.events){ const s=(State.attendance[ev.id]||{})[m.id]||''; if(s==='P') p++; if(s==='A') a++; if(s) mark++; }
+      return {txt:`${m.prenom||''} ${m.nom||''}`, rate: mark?Math.round(p/mark*100):0, detail:`${p}P / ${a}A (${mark} marqués)`};
+    }).sort((x,y)=>y.rate-x.rate).slice(0,10).forEach(it=>{
+      const d=document.createElement('div'); d.className='flex'; d.style.margin='6px 0';
+      d.innerHTML=`<span style="background:#fff1a3;border:1px solid #e8d26b;padding:3px 8px;border-radius:999px;font-weight:900">${it.rate}%</span>
+                   <span class="grow" style="padding-left:6px">${esc(it.txt)}</span>
+                   <span class="small">${it.detail}</span>`;
+      mWrap.appendChild(d);
+    });
+    const evs=[...State.events]; sortBy(evs,'date',true,'date');
+    evs.map(ev=>{
+      let p=0; for(const m of State.members){ const s=(State.attendance[ev.id]||{})[m.id]||''; if(s==='P') p++; }
+      const rate=State.members.length?Math.round(p/State.members.length*100):0;
+      return {txt:`${ev.date||''} — ${ev.title||''}`, rate, detail:`${p} présents / ${State.members.length} membres`};
+    }).sort((x,y)=>y.rate-x.rate).slice(0,10).forEach(it=>{
+      const d=document.createElement('div'); d.className='flex'; d.style.margin='6px 0';
+      d.innerHTML=`<span style="background:#fff1a3;border:1px solid #e8d26b;padding:3px 8px;border-radius:999px;font-weight:900">${it.rate}%</span>
+                   <span class="grow" style="padding-left:6px">${esc(it.txt)}</span>
+                   <span class="small">${it.detail}</span>`;
+      eWrap.appendChild(d);
+    });
+  }
+
+  /* --- Import / Export / Backup --- */
+  function parseCSV(t){const rows=[];let row=[],cur='',inQ=false;for(let i=0;i<t.length;i++){const c=t[i],n=t[i+1];if(c=='"'){if(inQ&&n=='"'){cur+='"';i++;}else inQ=!inQ;}else if(c==','&&!inQ){row.push(cur.trim());cur='';}else if((c=='\n'||c=='\r')&&!inQ){if(cur.length||row.length){row.push(cur.trim());rows.push(row);row=[];cur='';}if(c=='\r'&&n=='\n'){i++;}}else cur+=c;}if(cur.length||row.length){row.push(cur.trim());rows.push(row);}return rows.filter(r=>r.some(x=>x&&x.length));}
+  function toCSV(rows){return rows.map(r=>r.map(c=>{const s=(c??'').toString();return (/[,"\n\r]/.test(s))?`"${s.replace(/"/g,'""')}"`:s;}).join(',')).join('\n');}
+  function download(filename,content){const blob=new Blob([content],{type:filename.endsWith('.json')?'application/json':'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);}
+
+  el('#csvInput')?.addEventListener('change', async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try{
+      const rows=parseCSV(await f.text());
+      const head=(rows[0]||[]).map(x=>x.toLowerCase());
+      const hasHeader=['nom','prénom','prenom','tel','téléphone','mail','email','e-mail'].some(h=>head.includes(h));
+      const data=rows.slice(hasHeader?1:0);
+      const newcomers=data.map(r=>({id:uid(),nom:r[0]||'',prenom:r[1]||'',tel:r[2]||'',mail:r[3]||''}))
+                          .filter(m=>m.nom||m.prenom||m.mail||m.tel);
+      const byMail=new Map(State.members.filter(m=>m.mail).map(m=>[m.mail.toLowerCase(),m]));
+      newcomers.forEach(nm=>{const k=(nm.mail||'').toLowerCase(),ex=k&&byMail.get(k);
+        if(ex){ex.nom=nm.nom||ex.nom;ex.prenom=nm.prenom||ex.prenom;ex.tel=nm.tel||ex.tel;} else State.members.push(nm);});
+      saveAll(); e.target.value='';
+    }catch(err){ showError(err.message); }
+  });
+  el('#btnExportMembers')?.addEventListener('click',()=>{
+    const rows=[['nom','prenom','tel','mail'], ...State.members.map(m=>[m.nom,m.prenom,m.tel,m.mail])];
+    download('membres.csv', toCSV(rows));
+  });
+  el('#btnExportAttendance')?.addEventListener('click',()=>{
+    const evs=[...State.events]; sortBy(evs,'date',true,'date');
+    const cols=['date','titre','lieu','details', ...State.members.map(m=>`${m.prenom||''} ${m.nom||''}`)];
+    const rows=[cols];
+    evs.forEach(ev=>{
+      const map=State.attendance[ev.id]||{};
+      const r=[ev.date||'',ev.title||'',ev.place||'',ev.meta||''];
+      State.members.forEach(m=> r.push(map[m.id]||'') );
+      rows.push(r);
+    });
+    download('presences.csv', toCSV(rows));
+  });
+  el('#btnBackup')?.addEventListener('click',()=>{
+    download('cycloeneo_backup.json', JSON.stringify({
+      version:APP_VERSION, members:State.members, events:State.events, attendance:State.attendance,
+      exportedAt:new Date().toISOString()
+    },null,2));
+  });
+  el('#restoreInput')?.addEventListener('change', async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try{
+      const json=JSON.parse(await f.text());
+      if(json.members && json.events && json.attendance){
+        if(confirm('Remplacer les données actuelles par la sauvegarde ?')){
+          State.members=json.members; State.events=json.events; State.attendance=json.attendance; saveAll();
+        }
+      } else alert('Fichier invalide.');
+    }catch(err){ showError(err.message); }
+    e.target.value='';
+  });
+  el('#btnClearAll')?.addEventListener('click',()=>{
+    if(confirm('Tout effacer (membres, événements, présences) ?')){
+      State.members=[]; State.events=[]; State.attendance={}; saveAll();
+    }
+  });
+  el('#btnExample')?.addEventListener('click',()=>{
+    const csv=`nom,prenom,tel,mail
+Durand,Luc,0612345678,luc@example.com
+Martin,Sophie,0611223344,sophie@example.com
+Lefevre,Marc,0611558899,marc@example.com
+Dubois,Claire,0611228899,claire@example.com
+Lambert,Noé,0611002200,noe@example.com
+Moreau,Emma,0619988776,emma@example.com
+Petit,Anouk,0612341111,anouk@example.com
+Roux,Victor,0612342222,victor@example.com`;
+    const rows=csv.trim().split('\n').slice(1).map(l=>l.split(','));
+    State.members=rows.map(r=>({id:uid(),nom:r[0],prenom:r[1],tel:r[2],mail:r[3]}));
+    const today=new Date(), d=o=>new Date(today.getTime()+o*86400000).toISOString().slice(0,10);
+    State.events=[
+      {id:uid(),date:d(-7),title:'Sortie Vallonnée',place:'Bois',meta:'55 km — allure modérée'},
+      {id:uid(),date:d(-1),title:'Nocturne',place:'Parc',meta:'35 km — lumières obligatoires'},
+      {id:uid(),date:d(1),title:'Longue Distance',place:'Canal',meta:'80 km — allure soutenue'}
+    ];
+    State.attendance={}; for(const ev of State.events){ State.attendance[ev.id]={}; for(const m of State.members){
+      const pool=['','P','A']; State.attendance[ev.id][m.id]=pool[Math.floor(Math.random()*pool.length)]; } }
+    saveAll(); renderMatrix();
+  });
+
+  /* --- Tabs --- */
+  els('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
+    els('.tab-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    els('.view').forEach(v=>v.classList.remove('active')); el('#'+b.dataset.tab)?.classList.add('active');
+    if(b.dataset.tab==='tab-matrix') renderMatrix();
+  }));
+
+  /* --- Initial render --- */
+  function renderAll(){ renderMembers(); renderEvents(); renderMatrix(); }
+  renderAll();
+});
+</script>
+</body>
+</html>
