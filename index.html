@@ -15,8 +15,11 @@
   --focus:#ffcf33; --present:#1f9d55; --absent:#d64545;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;color:var(--text);
-  background:linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 70%, var(--bg-1) 100%);}
+body{
+  margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;color:var(--text);
+  background:linear-gradient(180deg,var(--bg-1) 0%, var(--bg-2) 70%, var(--bg-1) 100%);
+}
+/* Header */
 header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fffdf2 0%, #fff7cc 100%);border-bottom:1px solid var(--border);}
 .container{max-width:1200px;margin:auto;padding:14px 16px}
 .brand{display:flex;gap:12px;align-items:center}
@@ -24,20 +27,24 @@ header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,#fffdf
 .brand-title{font-size:26px;font-weight:900;letter-spacing:.2px}
 .badges{display:flex;gap:8px;align-items:center;margin-left:auto}
 .badge{padding:4px 10px;border-radius:999px;background:var(--panel-soft);border:1px solid var(--border);font-size:12px;color:var(--muted);font-weight:700}
+/* Tabs */
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .tab-btn{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:800;box-shadow:0 2px 0 rgba(0,0,0,.03)}
 .tab-btn.active{background:var(--accent-2);border-color:#f2c43a;box-shadow:inset 0 -2px 0 rgba(0,0,0,.06)}
 .tab-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+/* Layout */
 main.container{padding-top:14px;padding-bottom:24px}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px 14px 10px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
 .panel h2{margin:2px 0 12px;font-size:18px}
 .panel .sub{color:var(--muted);font-size:12px;margin:-6px 0 10px}
 .grid{display:grid;gap:12px}
+/* KPIs */
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 @media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:var(--panel-soft);border:1px solid var(--border);padding:12px;border-radius:12px}
 .kpi .label{font-size:12px;color:var(--muted)}
 .kpi .value{font-size:22px;font-weight:900;color:#7a5d00}
+/* Tables */
 .table-wrap{border:1px solid var(--grid);border-radius:10px;overflow:auto;max-height:420px;background:white}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:10px;border-bottom:1px solid var(--grid);white-space:nowrap}
@@ -46,25 +53,36 @@ th.sortable{cursor:pointer}
 th.sortable:hover{background:#fff1a3}
 th .arrow{font-size:11px;color:var(--muted);margin-left:4px}
 tr:hover td{background:#fff8dc}
+/* Inputs & buttons */
 input,select{background:#fffdf2;color:var(--text);border:1px solid var(--border);padding:9px 10px;border-radius:8px}
 input:focus,select:focus{outline:3px solid var(--focus);outline-offset:2px}
 button,.btn{background:linear-gradient(180deg,var(--accent) 0%, #ffb000 100%);color:#2b2109;border:1px solid #f2ad00;padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:900;transition:.15s;display:inline-flex;gap:8px;align-items:center}
 button:hover{transform:translateY(-1px)}
 button.ghost{background:var(--panel);border:1px solid var(--border);color:var(--text)}
 button.danger{background:linear-gradient(180deg,#ff7a7a 0%, #f25d5d 100%);border-color:#e85b5b;color:#fff}
+/* Presence chips */
 .state{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid rgba(0,0,0,.06)}
 .state[data-s="P"]{background:#e8fff3;color:#0b6b3b;border-color:#9be7be}
 .state[data-s="A"]{background:#ffecec;color:#8a2020;border-color:#ffb3b3}
-.state[data-s=""]{background:#f0f3f7;color:#667085;border-color:#d6dde8}
+/* Misc */
 .small{font-size:12px;color:var(--muted)}
 .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .grow{flex:1}
-.right{margin-left:auto}
 .hr{height:1px;background:var(--border);margin:10px 0}
 .view{display:none}
 .view.active{display:block}
 footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--border);background:#fff9d6}
+/* Toast */
 #errToast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#ffeded;color:#7a1f1f;border:1px solid #f3b1b1;padding:8px 12px;border-radius:8px;font-size:13px;display:none;z-index:9999}
+/* Verrouillage: style appliqué directement sur la cellule (th/td) */
+.lock-badge{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid #e8d26b;background:#fff1a3;color:#5a4a00;margin-left:6px;cursor:pointer}
+.col-locked{position:relative;background:#fff5e0 !important}
+.col-locked::after{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(0,0,0,.03) 8px,rgba(0,0,0,.03) 16px);
+  pointer-events:none;
+}
+.cell-disabled{cursor:not-allowed;opacity:.7}
 </style>
 </head>
 <body>
@@ -84,7 +102,7 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
       </svg>
       <div class="brand-title">Cyclo Énéo</div>
       <div class="badges">
-        <span class="badge" id="badgeVersion">v1.0.6</span>
+        <span class="badge" id="badgeVersion">v1.0.8</span>
         <span class="badge" id="clubSize">0 membres</span>
       </div>
     </div>
@@ -106,7 +124,7 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
     <div class="kpi"><div class="label">Taux moyen</div><div class="value" id="kpiRate">0%</div></div>
   </section>
 
-  <!-- Membres -->
+  <!-- MEMBRES -->
   <section id="tab-members" class="view active panel">
     <h2>👥 Membres</h2>
     <div class="flex"><input id="searchMember" class="grow" placeholder="Rechercher..." /><button id="btnAddMember">➕ Ajouter</button></div>
@@ -127,10 +145,10 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
     </div>
   </section>
 
-  <!-- Événements -->
+  <!-- ÉVÉNEMENTS -->
   <section id="tab-events" class="view panel">
     <h2>📅 Événements</h2>
-    <div class="sub">Crée une sortie puis clique “Pointer” pour ouvrir la colonne dans la matrice.</div>
+    <div class="sub">Crée une sortie, verrouille/déverrouille la colonne, et “Pointer” pour ouvrir la matrice.</div>
     <form id="frmEvent" class="grid" style="grid-template-columns:repeat(2,1fr)">
       <input type="date" id="evDate" required />
       <input type="text" id="evTitle" placeholder="Titre ex. Sortie du dimanche" required />
@@ -147,6 +165,7 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
             <th class="sortable" data-k="title">Titre <span class="arrow"></span></th>
             <th class="sortable" data-k="place">Lieu <span class="arrow"></span></th>
             <th class="sortable" data-k="meta">Détails <span class="arrow"></span></th>
+            <th>Verrou</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -155,16 +174,16 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
     </div>
   </section>
 
-  <!-- Présences -->
+  <!-- PRÉSENCES -->
   <section id="tab-matrix" class="view panel">
     <h2>🧾 Présences</h2>
-    <div class="sub">Clique pour basculer <span class="state" data-s="P">Présent</span> / <span class="state" data-s="A">Absent</span> — clic long pour vider.</div>
+    <div class="sub">Clique pour basculer <span class="state" data-s="P">Présent</span> / <span class="state" data-s="A">Absent</span>. Les colonnes verrouillées ne sont pas modifiables.</div>
     <div class="table-wrap">
       <table id="tblMatrix"><thead></thead><tbody></tbody></table>
     </div>
   </section>
 
-  <!-- Stats -->
+  <!-- STATS -->
   <section id="tab-stats" class="view panel">
     <h2>📊 Statistiques</h2>
     <div class="grid" style="grid-template-columns:1fr 1fr">
@@ -173,14 +192,14 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
     </div>
   </section>
 
-  <!-- Paramètres -->
+  <!-- PARAMÈTRES -->
   <section id="tab-settings" class="view panel">
     <h2>⚙️ Paramètres & Données</h2>
     <div class="small" id="appInfo"></div>
     <div class="grid" style="grid-template-columns:1fr 1fr">
       <div class="panel" style="background:var(--panel-soft)">
         <h3>📥 Import</h3>
-        <div class="small">CSV colonnes : <code>nom; prénom; tel; mail</code> ou <code>nom, prénom, tel, mail</code> (les deux acceptés).</div>
+        <div class="small">CSV : <code>nom; prénom; tel; mail</code> ou <code>nom, prénom, tel, mail</code> (les deux acceptés).</div>
         <label class="btn">Importer CSV<input id="csvInput" type="file" accept=".csv" hidden></label>
         <div class="hr"></div>
         <label class="btn">Restaurer sauvegarde<input id="restoreInput" type="file" accept=".json" hidden></label>
@@ -207,32 +226,46 @@ footer{color:#6b5c1f;text-align:center;padding:18px;border-top:1px solid var(--b
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  /* DOM helpers */
+  /* ===== Helpers & toast ===== */
   const el = s=>document.querySelector(s), els = s=>Array.from(document.querySelectorAll(s));
   const toast = document.getElementById('errToast');
   const showError = msg => { console.error('[Cyclo Énéo]', msg); if(!toast) return; toast.textContent='Erreur: '+msg; toast.style.display='block'; clearTimeout(showError._t); showError._t=setTimeout(()=>toast.style.display='none',4000); };
   window.onerror = (m,src,ln,col,err)=>{ showError(err?.message || m); };
 
-  const APP_VERSION='v1.0.6';
+  const APP_VERSION='v1.0.8';
   el('#badgeVersion').textContent=APP_VERSION;
   el('#appInfo').textContent=`Cyclo Énéo — ${APP_VERSION}. Données locales (LocalStorage).`;
 
-  const KEYS={ members:'cycloeneo.members.v6', events:'cycloeneo.events.v6', attendance:'cycloeneo.attendance.v6', sort:'cycloeneo.sort.v2' };
+  /* ===== Storage & state ===== */
+  const KEYS={
+    members:'cycloeneo.members.v8',
+    events:'cycloeneo.events.v8',
+    attendance:'cycloeneo.attendance.v8',
+    sort:'cycloeneo.sort.v3',
+    locks:'cycloeneo.locks.v2'
+  };
   const load=(k,f)=>{ try{const r=localStorage.getItem(k); return r?JSON.parse(r):f;}catch(e){showError(e.message); return f;} };
   const State={
     members:load(KEYS.members,[]),
     events:load(KEYS.events,[]),
-    attendance:load(KEYS.attendance,{}),
-    sort:load(KEYS.sort,{members:{key:'nom',asc:true},events:{key:'date',asc:true,type:'date'}})
+    attendance:load(KEYS.attendance,{}), // { [eventId]: { [memberId]: 'A'|'P' } }
+    sort:load(KEYS.sort,{members:{key:'nom',asc:true},events:{key:'date',asc:true,type:'date'}}),
+    locks:load(KEYS.locks,{}) // { [eventId]: boolean }
   };
-  const saveAll=()=>{ localStorage.setItem(KEYS.members,JSON.stringify(State.members)); localStorage.setItem(KEYS.events,JSON.stringify(State.events)); localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance)); localStorage.setItem(KEYS.sort,JSON.stringify(State.sort)); renderAll(); };
+  const saveAll=()=>{ localStorage.setItem(KEYS.members,JSON.stringify(State.members));
+                      localStorage.setItem(KEYS.events,JSON.stringify(State.events));
+                      localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance));
+                      localStorage.setItem(KEYS.sort,JSON.stringify(State.sort));
+                      localStorage.setItem(KEYS.locks,JSON.stringify(State.locks));
+                      renderAll(); };
   const saveAttendance=()=> localStorage.setItem(KEYS.attendance,JSON.stringify(State.attendance));
+  const saveLocks=()=> localStorage.setItem(KEYS.locks,JSON.stringify(State.locks));
   const saveSort=()=> localStorage.setItem(KEYS.sort,JSON.stringify(State.sort));
   const uid=()=>Math.random().toString(36).slice(2,10);
   const esc=s=>(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const escAttr=s=>esc(s).replace(/"/g,'&quot;');
 
-  /* ---------- CSV utils : auto ; ou , ---------- */
+  /* ===== CSV utils (auto ; ou ,) + export ; ===== */
   const detectDelimiter = (text)=>{
     const firstLine = (text.split(/\r?\n/).find(l=>l.trim().length>0) || '');
     const sc = (firstLine.match(/;/g)||[]).length;
@@ -260,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function download(filename,content){ const blob=new Blob([content],{type: filename.endsWith('.json')?'application/json':'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1200); }
 
-  /* ---------- Tri générique ---------- */
+  /* ===== Sorting ===== */
   const sortBy=(arr,key,asc=true,type='text')=>{
     const n=v=> type==='date' ? (v||'') : (v??'').toString().toLowerCase();
     return arr.sort((a,b)=> (n(a[key])<n(b[key])?-1: n(a[key])>n(b[key])?1:0) * (asc?1:-1));
@@ -271,7 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(sp) sp.textContent = st.asc ? '▲' : '▼';
   };
 
-  /* ---------- Membres ---------- */
+  /* ===== Presence helpers ===== */
+  const P='P', A='A';
+  const chip=s=>`<span class="state" data-s="${s}">${s===P?'Présent':'Absent'}</span>`;
+
+  /* ===== Membres ===== */
   function renderMembers(){
     const tbody=el('#tblMembers tbody'); if(!tbody) return;
     const q=(el('#searchMember')?.value||'').toLowerCase();
@@ -302,7 +339,16 @@ document.addEventListener('DOMContentLoaded', () => {
     el('#clubSize').textContent=`${State.members.length} membres`;
     el('#kpiMembers').textContent=State.members.length;
   }
-  el('#btnAddMember')?.addEventListener('click',()=>{ State.members.push({id:uid(),nom:'',prenom:'',tel:'',mail:''}); saveAll(); });
+  el('#btnAddMember')?.addEventListener('click',()=>{
+    const m = {id:uid(),nom:'',prenom:'',tel:'',mail:''};
+    State.members.push(m);
+    // défaut A sur tous les events existants
+    for(const ev of State.events){
+      State.attendance[ev.id]=State.attendance[ev.id]||{};
+      State.attendance[ev.id][m.id]=A;
+    }
+    saveAll();
+  });
   el('#searchMember')?.addEventListener('input',renderMembers);
   els('#tblMembers th.sortable').forEach(th=>{
     th.addEventListener('click',()=>{
@@ -313,12 +359,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  /* ---------- Événements ---------- */
+  /* ===== Événements ===== */
   function renderEvents(){
     const tbody=el('#tblEvents tbody'); if(!tbody) return;
     const rows=[...State.events]; sortBy(rows, State.sort.events.key, State.sort.events.asc, State.sort.events.type);
     tbody.innerHTML='';
     rows.forEach((ev,i)=>{
+      const locked = !!State.locks[ev.id];
       const tr=document.createElement('tr');
       tr.innerHTML=`
         <td>${i+1}</td>
@@ -326,7 +373,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <td><input value="${escAttr(ev.title||'')}" data-k="title"/></td>
         <td><input value="${escAttr(ev.place||'')}" data-k="place"/></td>
         <td><input value="${escAttr(ev.meta||'')}" data-k="meta"/></td>
-        <td><button data-open class="ghost">🧾 Pointer</button><button data-dup class="ghost">🗂️</button><button data-del class="danger">🗑️</button></td>`;
+        <td><button data-lock class="ghost">${locked?'🔒 Verrouillé':'🔓 Déverrouillé'}</button></td>
+        <td>
+          <button data-open class="ghost">🧾 Pointer</button>
+          <button data-dup class="ghost">🗂️</button>
+          <button data-del class="danger">🗑️</button>
+        </td>`;
       tr.querySelectorAll('input').forEach(inp=>{
         inp.addEventListener('change',()=>{ ev[inp.dataset.k]=inp.value.trim(); saveAll(); });
       });
@@ -334,13 +386,19 @@ document.addEventListener('DOMContentLoaded', () => {
         renderMatrix(ev.id); el('.tab-btn[data-tab="tab-matrix"]')?.click(); highlightColumn(ev.id);
       });
       tr.querySelector('[data-dup]')?.addEventListener('click',()=>{
-        const clone={...ev, id:uid()}; State.events.push(clone);
-        State.attendance[clone.id]=JSON.parse(JSON.stringify(State.attendance[ev.id]||{})); saveAll();
+        const clone={...ev, id:uid()};
+        State.events.push(clone);
+        State.attendance[clone.id]=JSON.parse(JSON.stringify(State.attendance[ev.id]||{}));
+        State.locks[clone.id]=State.locks[ev.id]||false; saveAll();
       });
       tr.querySelector('[data-del]')?.addEventListener('click',()=>{
         if(confirm(`Supprimer "${ev.title||''}" du ${ev.date||''} ?`)){
-          delete State.attendance[ev.id]; State.events=State.events.filter(x=>x.id!==ev.id); saveAll();
+          delete State.attendance[ev.id]; delete State.locks[ev.id];
+          State.events=State.events.filter(x=>x.id!==ev.id); saveAll();
         }
+      });
+      tr.querySelector('[data-lock]')?.addEventListener('click',()=>{
+        State.locks[ev.id]=!State.locks[ev.id]; saveLocks(); renderEvents(); renderMatrix();
       });
       tbody.appendChild(tr);
     });
@@ -363,43 +421,72 @@ document.addEventListener('DOMContentLoaded', () => {
       place:(el('#evPlace')?.value||'').trim(),
       meta:(el('#evMeta')?.value||'').trim()
     };
-    State.events.push(ev); State.attendance[ev.id]={}; e.target.reset(); saveAll(); renderMatrix(ev.id);
+    State.events.push(ev);
+    // par défaut A sur tous les membres
+    State.attendance[ev.id]={};
+    for(const m of State.members){ State.attendance[ev.id][m.id]=A; }
+    State.locks[ev.id]=false; // non verrouillé au départ
+    e.target.reset(); saveAll(); renderMatrix(ev.id);
   });
 
-  /* ---------- Matrice Présences ---------- */
+  /* ===== Matrice Présences ===== */
+  function eventsSortedForMatrix(){ // plus récent à gauche
+    const evs=[...State.events];
+    evs.sort((a,b)=> (b.date||'').localeCompare(a.date||'')); // DESC
+    return evs;
+  }
   function renderMatrix(focusEventId=null){
     const thead=el('#tblMatrix thead'), tbody=el('#tblMatrix tbody'); if(!thead||!tbody) return;
-    const evs=[...State.events]; sortBy(evs, State.sort.events.key, State.sort.events.asc, State.sort.events.type);
-    thead.innerHTML=''; const trh=document.createElement('tr');
-    trh.innerHTML=`<th>Membre</th>`+evs.map(ev=>`<th data-ev="${ev.id}" title="${escAttr(ev.title||'')}">${ev.date||''}<div class="small">${esc(ev.title||'')}</div></th>`).join('');
+    const evs = eventsSortedForMatrix();
+    // ---- ENTÊTES ----
+    thead.innerHTML='';
+    const trh=document.createElement('tr');
+    trh.innerHTML=`<th>Membre</th>`+evs.map(ev=>{
+      const locked = !!State.locks[ev.id];
+      const lockBtn = `<button class="lock-badge" data-lock-col="${ev.id}" title="${locked?'Déverrouiller':'Verrouiller'}">${locked?'🔒 Verrouillé':'🔓 Déverrouiller'}</button>`;
+      return `<th data-ev="${ev.id}" ${locked?'class="col-locked"':''}>${ev.date||''}
+        <div class="small">${esc(ev.title||'')}</div>${lockBtn}</th>`;
+    }).join('');
     thead.appendChild(trh);
-    const members=[...State.members]; sortBy(members, State.sort.members.key, State.sort.members.asc, 'text');
+
+    // ---- LIGNES MEMBRES ----
+    const members=[...State.members];
+    sortBy(members, State.sort.members.key, State.sort.members.asc, 'text');
     tbody.innerHTML='';
     members.forEach(m=>{
       const tr=document.createElement('tr');
       tr.innerHTML=`<td>${esc(m.prenom)} ${esc(m.nom)}</td>`+evs.map(ev=>{
-        const s=(State.attendance[ev.id]||{})[m.id]||'';
-        return `<td data-ev="${ev.id}" data-m="${m.id}" style="text-align:center;cursor:pointer"><span class="state" data-s="${s}">${s==='P'?'Présent':s==='A'?'Absent':'—'}</span></td>`;
+        const s=(State.attendance[ev.id]||{})[m.id]||A; // sécurité: A par défaut
+        const locked = !!State.locks[ev.id];
+        return `<td data-ev="${ev.id}" data-m="${m.id}" ${locked?'class="col-locked cell-disabled"':''} style="text-align:center;cursor:${locked?'not-allowed':'pointer'}">${chip(s)}</td>`;
       }).join('');
       tbody.appendChild(tr);
     });
+
+    // ---- Interactions cellules (désactivées si verrou) ----
     tbody.querySelectorAll('td[data-ev]').forEach(td=>{
-      let t=null;
       td.onclick=()=>{
         const evId=td.getAttribute('data-ev'), mId=td.getAttribute('data-m');
-        const cur=(State.attendance[evId]||{})[mId]||'';
-        const next=cur==='P'?'A':cur==='A'?'P':'P';
-        State.attendance[evId]=State.attendance[evId]||{}; State.attendance[evId][mId]=next;
-        td.innerHTML=`<span class="state" data-s="${next}">${next==='P'?'Présent':'Absent'}</span>`;
+        if(State.locks[evId]) return; // protégé
+        const cur=(State.attendance[evId]||{})[mId]||A;
+        const next = cur===P ? A : P; // bascule stricte A<->P
+        State.attendance[evId]=State.attendance[evId]||{};
+        State.attendance[evId][mId]=next;
+        td.innerHTML=chip(next);
         updateKPIs(); renderStats(); saveAttendance();
       };
-      td.onmousedown=()=>{ t=setTimeout(()=>{
-        const evId=td.getAttribute('data-ev'), mId=td.getAttribute('data-m');
-        State.attendance[evId]=State.attendance[evId]||{}; State.attendance[evId][mId]='';
-        td.innerHTML=`<span class="state" data-s=""></span>`; updateKPIs(); renderStats(); saveAttendance();
-      },550); };
-      td.onmouseup=()=>clearTimeout(t); td.onmouseleave=()=>clearTimeout(t);
     });
+
+    // ---- Boutons de verrou par colonne ----
+    thead.querySelectorAll('[data-lock-col]').forEach(btn=>{
+      btn.onclick=()=>{
+        const evId = btn.getAttribute('data-lock-col');
+        State.locks[evId] = !State.locks[evId];
+        saveLocks(); renderMatrix(evId);
+      };
+    });
+
+    // ---- Focus visuel + KPI/Stats ----
     if(focusEventId) highlightColumn(focusEventId);
     updateKPIs(); renderStats();
   }
@@ -409,9 +496,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(()=>els(`#tblMatrix [data-ev="${evId}"]`).forEach(td=> td.style.outline='none'),1200);
   }
 
-  /* ---------- Stats ---------- */
+  /* ===== Stats ===== */
   function updateKPIs(){
-    const present = Object.values(State.attendance).reduce((s,map)=> s + (map? Object.values(map).filter(x=>x==='P').length : 0), 0);
+    const present = Object.values(State.attendance).reduce((s,map)=> s + (map? Object.values(map).filter(x=>x===P).length : 0), 0);
     const slots = State.members.length * State.events.length;
     el('#kpiPresence').textContent=present;
     el('#kpiRate').textContent= slots? Math.round((present/slots)*100)+'%':'0%';
@@ -421,9 +508,10 @@ document.addEventListener('DOMContentLoaded', () => {
     mWrap.innerHTML=''; eWrap.innerHTML='';
     const memb=[...State.members]; sortBy(memb,'nom',true);
     memb.map(m=>{
-      let p=0,a=0,mark=0;
-      for(const ev of State.events){ const s=(State.attendance[ev.id]||{})[m.id]||''; if(s==='P') p++; if(s==='A') a++; if(s) mark++; }
-      return {txt:`${m.prenom||''} ${m.nom||''}`, rate: mark?Math.round(p/mark*100):0, detail:`${p}P / ${a}A (${mark} marqués)`};
+      let p=0,a=0;
+      for(const ev of State.events){ const s=(State.attendance[ev.id]||{})[m.id]||A; if(s===P) p++; else a++; }
+      const mark=p+a; const rate= mark?Math.round(p/mark*100):0;
+      return {txt:`${m.prenom||''} ${m.nom||''}`, rate, detail:`${p}P / ${a}A (${mark} marqués)`};
     }).sort((x,y)=>y.rate-x.rate).slice(0,10).forEach(it=>{
       const d=document.createElement('div'); d.className='flex'; d.style.margin='6px 0';
       d.innerHTML=`<span style="background:#fff1a3;border:1px solid #e8d26b;padding:3px 8px;border-radius:999px;font-weight:900">${it.rate}%</span>
@@ -431,9 +519,9 @@ document.addEventListener('DOMContentLoaded', () => {
                    <span class="small">${it.detail}</span>`;
       mWrap.appendChild(d);
     });
-    const evs=[...State.events]; sortBy(evs,'date',true,'date');
+    const evs=[...State.events]; evs.sort((a,b)=> (b.date||'').localeCompare(a.date||'')); // récent -> ancien
     evs.map(ev=>{
-      let p=0; for(const m of State.members){ const s=(State.attendance[ev.id]||{})[m.id]||''; if(s==='P') p++; }
+      let p=0; for(const m of State.members){ const s=(State.attendance[ev.id]||{})[m.id]||A; if(s===P) p++; }
       const rate=State.members.length?Math.round(p/State.members.length*100):0;
       return {txt:`${ev.date||''} — ${ev.title||''}`, rate, detail:`${p} présents / ${State.members.length} membres`};
     }).sort((x,y)=>y.rate-x.rate).slice(0,10).forEach(it=>{
@@ -445,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ---------- Import / Export / Backup ---------- */
+  /* ===== Import / Export / Backup ===== */
   el('#csvInput')?.addEventListener('change', async e=>{
     const f=e.target.files[0]; if(!f) return;
     try{
@@ -456,9 +544,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const newcomers=data.map(r=>({id:uid(), nom:r[0]||'', prenom:r[1]||'', tel:r[2]||'', mail:r[3]||''}))
                           .filter(m=>m.nom||m.prenom||m.mail||m.tel);
       const byMail=new Map(State.members.filter(m=>m.mail).map(m=>[m.mail.toLowerCase(),m]));
-      newcomers.forEach(nm=>{ const k=(nm.mail||'').toLowerCase(), ex=k && byMail.get(k);
+      newcomers.forEach(nm=>{
+        const k=(nm.mail||'').toLowerCase(), ex=k && byMail.get(k);
         if(ex){ ex.nom=nm.nom||ex.nom; ex.prenom=nm.prenom||ex.prenom; ex.tel=nm.tel||ex.tel; }
-        else State.members.push(nm);
+        else {
+          State.members.push(nm);
+          for(const ev of State.events){
+            State.attendance[ev.id]=State.attendance[ev.id]||{};
+            State.attendance[ev.id][nm.id]=A;
+          }
+        }
       });
       saveAll(); e.target.value='';
     }catch(err){ showError(err.message); }
@@ -466,23 +561,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   el('#btnExportMembers')?.addEventListener('click',()=>{
     const rows=[['nom','prenom','tel','mail'], ...State.members.map(m=>[m.nom,m.prenom,m.tel,m.mail])];
-    download('membres.csv', toCSV(rows, ';')); // export FR-friendly
+    download('membres.csv', toCSV(rows, ';'));
   });
   el('#btnExportAttendance')?.addEventListener('click',()=>{
-    const evs=[...State.events]; sortBy(evs,'date',true,'date');
+    const evs=[...State.events]; evs.sort((a,b)=> (b.date||'').localeCompare(a.date||'')); // récent->ancien
     const cols=['date','titre','lieu','details', ...State.members.map(m=>`${m.prenom||''} ${m.nom||''}`)];
     const rows=[cols];
     evs.forEach(ev=>{
       const map=State.attendance[ev.id]||{};
       const r=[ev.date||'',ev.title||'',ev.place||'',ev.meta||''];
-      State.members.forEach(m=> r.push(map[m.id]||'') );
+      State.members.forEach(m=> r.push(map[m.id]||A) );
       rows.push(r);
     });
-    download('presences.csv', toCSV(rows, ';')); // export FR-friendly
+    download('presences.csv', toCSV(rows, ';'));
   });
   el('#btnBackup')?.addEventListener('click',()=>{
     download('cycloeneo_backup.json', JSON.stringify({
-      version:APP_VERSION, members:State.members, events:State.events, attendance:State.attendance,
+      version:APP_VERSION, members:State.members, events:State.events, attendance:State.attendance, locks:State.locks,
       exportedAt:new Date().toISOString()
     },null,2));
   });
@@ -492,45 +587,52 @@ document.addEventListener('DOMContentLoaded', () => {
       const json=JSON.parse(await f.text());
       if(json.members && json.events && json.attendance){
         if(confirm('Remplacer les données actuelles par la sauvegarde ?')){
-          State.members=json.members; State.events=json.events; State.attendance=json.attendance; saveAll();
+          State.members=json.members; State.events=json.events; State.attendance=json.attendance;
+          State.locks=json.locks||{}; saveAll();
         }
       } else alert('Fichier invalide.');
     }catch(err){ showError(err.message); }
     e.target.value='';
   });
   el('#btnClearAll')?.addEventListener('click',()=>{
-    if(confirm('Tout effacer (membres, événements, présences) ?')){
-      State.members=[]; State.events=[]; State.attendance={}; saveAll();
+    if(!confirm('Voulez-vous VRAIMENT tout effacer ? (membres, événements, présences)')) return;
+    const ok = prompt('Tapez "OUI" pour CONFIRMER la suppression totale :');
+    if(ok==='OUI'){
+      State.members=[]; State.events=[]; State.attendance={}; State.locks={}; saveAll();
     }
   });
-  el('#btnExample')?.addEventListener('click',()=>{
-    const csv=`nom;prenom;tel;mail
-Durand;Luc;0612345678;luc@example.com
-Martin;Sophie;0611223344;sophie@example.com
-Lefevre;Marc;0611558899;marc@example.com
-Dubois;Claire;0611228899;claire@example.com`;
-    const rows=parseCSV(csv).slice(1);
-    State.members=rows.map(r=>({id:uid(),nom:r[0],prenom:r[1],tel:r[2],mail:r[3]}));
-    const today=new Date(), d=o=>new Date(today.getTime()+o*86400000).toISOString().slice(0,10);
-    State.events=[
-      {id:uid(),date:d(-7),title:'Sortie Vallonnée',place:'Bois',meta:'55 km — allure modérée'},
-      {id:uid(),date:d(-1),title:'Nocturne',place:'Parc',meta:'35 km — lumières obligatoires'},
-      {id:uid(),date:d(1),title:'Longue Distance',place:'Canal',meta:'80 km — allure soutenue'}
-    ];
-    State.attendance={}; for(const ev of State.events){ State.attendance[ev.id]={}; for(const m of State.members){
-      const pool=['','P','A']; State.attendance[ev.id][m.id]=pool[Math.floor(Math.random()*pool.length)]; } }
-    saveAll(); renderMatrix();
-  });
 
-  /* Tabs */
+  /* ===== Onglets ===== */
   els('.tab-btn').forEach(b=>b.addEventListener('click',()=>{
     els('.tab-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
     els('.view').forEach(v=>v.classList.remove('active')); el('#'+b.dataset.tab)?.classList.add('active');
     if(b.dataset.tab==='tab-matrix') renderMatrix();
   }));
 
+  /* ===== Initial render & Exemple ===== */
   function renderAll(){ renderMembers(); renderEvents(); renderMatrix(); }
   renderAll();
+
+  el('#btnExample')?.addEventListener('click',()=>{
+    const csv=`nom;prenom;tel;mail
+Durand;Luc;0612345678;luc@example.com
+Martin;Sophie;0611223344;sophie@example.com
+Lefevre;Marc;0611558899;marc@example.com
+Dubois;Claire;0611228899;claire@example.com
+Lambert;Noé;0611002200;noe@example.com
+Moreau;Emma;0619988776;emma@example.com`;
+    const rows=parseCSV(csv).slice(1);
+    State.members=rows.map(r=>({id:uid(),nom:r[0],prenom:r[1],tel:r[2],mail:r[3]}));
+    const today=new Date(), d=o=>new Date(today.getTime()+o*86400000).toISOString().slice(0,10);
+    const e1={id:uid(),date:d(-1),title:'Nocturne',place:'Parc',meta:'35 km — lumières obligatoires'};
+    const e2={id:uid(),date:d(0),title:'Sortie Dimanche',place:'Bois',meta:'55 km'};
+    const e3={id:uid(),date:d(7),title:'Longue Distance',place:'Canal',meta:'80 km'};
+    State.events=[e1,e2,e3];
+    State.attendance={};
+    for(const ev of State.events){ State.attendance[ev.id]={}; for(const m of State.members){ State.attendance[ev.id][m.id]=A; } }
+    State.locks={ [e1.id]:true, [e2.id]:false, [e3.id]:false };
+    saveAll(); renderMatrix(e3.id);
+  });
 });
 </script>
 </body>
